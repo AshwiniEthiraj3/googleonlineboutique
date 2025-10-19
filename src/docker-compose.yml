@@ -1,0 +1,174 @@
+services:
+  # 🧠 Redis (for Cart Service)
+  redis-cart:
+    image: redis:alpine
+    container_name: redis-cart
+    ports:
+      - "6379:6379"
+
+  # 🛒 Cart Service (.NET)
+  cartservice:
+    build: ./cartservice
+    image: ashwini/cartservice:v1
+    container_name: cartservice
+    depends_on:
+      - redis-cart
+    environment:
+      - REDIS_ADDR=redis-cart:6379
+      - DISABLE_PROFILER=true
+    ports:
+      - "7070:7070"
+
+  # 💰 Currency Service (Node.js)
+  currencyservice:
+    build: ./currencyservice
+    image: ashwini/currencyservice:v1
+    container_name: currencyservice
+    environment:
+      - DISABLE_PROFILER=true
+      - PORT=7000
+    ports:
+      - "7000:7000"
+
+  # 🧾 Product Catalog Service (Go)
+  productcatalogservice:
+    build: ./productcatalogservice
+    image: ashwini/productcatalogservice:v1
+    container_name: productcatalogservice
+    environment:
+      - DISABLE_PROFILER=true
+      - PORT=3550
+    ports:
+      - "3550:3550"
+
+  # 🚚 Shipping Service (Go)
+  shippingservice:
+    build: ./shippingservice
+    image: ashwini/shippingservice:v1
+    container_name: shippingservice
+    environment:
+      - DISABLE_PROFILER=true
+      - PORT=50051
+    ports:
+      - "50051:50051"
+
+  # 💳 Payment Service (Node.js)
+  paymentservice:
+    build: ./paymentservice
+    image: ashwini/paymentservice:v1
+    container_name: paymentservice
+    environment:
+      - DISABLE_PROFILER=true
+      - PORT=8086
+    ports:
+      - "8086:8086"
+
+  # ✉️ Email Service (Python)
+  emailservice:
+    build: ./emailservice
+    image: ashwini/emailservice:v1
+    container_name: emailservice
+    environment:
+      - DISABLE_PROFILER=true
+      - PORT=8080
+    ports:
+      - "8081:8080"
+
+  # 🧾 Checkout Service (Go)
+  checkoutservice:
+    build: ./checkoutservice
+    image: ashwini/checkoutservice:v1
+    container_name: checkoutservice
+    depends_on:
+      - productcatalogservice
+      - cartservice
+      - currencyservice
+      - shippingservice
+      - paymentservice
+      - emailservice
+      
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CART_SERVICE_ADDR=cartservice:7070
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - PAYMENT_SERVICE_ADDR=paymentservice:8086
+      - EMAIL_SERVICE_ADDR=emailservice:8080
+      - DISABLE_PROFILER=true
+      - PORT=5050
+    ports:
+      - "5050:5050"
+
+  # 🎯 Ad Service (Java)
+  adservice:
+    build: ./adservice
+    image: ashwini/adservice:v1
+    container_name: adservice
+    environment:
+      - PORT=9555
+      - DISABLE_PROFILER=true
+    ports:
+      - "9555:9555"
+
+  # 🧠 Recommendation Service (Python)
+  recommendationservice:
+    build: ./recommendationservice
+    image: ashwini/recommendationservice:v1
+    container_name: recommendationservice
+    depends_on:
+      - productcatalogservice
+      - adservice
+    environment:
+      - PORT=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - AD_SERVICE_ADDR=adservice:9555
+      - DISABLE_PROFILER=true
+    ports:
+      - "8082:8080"
+
+
+  # 🏪 Frontend Service (Go)
+  frontend:
+    build: ./frontend
+    image: ashwini/frontendservice:v1
+    container_name: frontend
+    depends_on:
+      - adservice
+      - recommendationservice
+      - productcatalogservice
+      - cartservice
+      - currencyservice
+      - shippingservice
+      - checkoutservice
+      - emailservice
+      - paymentservice
+    environment:
+      - PORT=8080
+      - AD_SERVICE_ADDR=adservice:9555
+      - RECOMMENDATION_SERVICE_ADDR=recommendationservice:8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=productcatalogservice:3550
+      - CART_SERVICE_ADDR=cartservice:7070
+      - CURRENCY_SERVICE_ADDR=currencyservice:7000
+      - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
+      - SHIPPING_SERVICE_ADDR=shippingservice:50051
+      - EMAIL_SERVICE_ADDR=emailservice:8080
+      - PAYMENT_SERVICE_ADDR=paymentservice:8086
+      - DISABLE_PROFILER=true
+    ports:
+      - "8080:8080"
+
+  # 🔁 Load Generator
+  loadgenerator:
+    build: ./loadgenerator
+    image: ashwini/loadgeneratorservice:v1
+    container_name: loadgenerator
+    depends_on:
+      - frontend
+    environment:
+      - FRONTEND_ADDR=frontend:8080
+      - USERS=10
+      - DISABLE_PROFILER=true
+
+networks:
+  default:
+    driver: bridge

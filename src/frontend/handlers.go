@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 	"math/rand"
 	"net"
 	"net/http"
@@ -45,9 +44,10 @@ type platformDetails struct {
 var (
 	frontendMessage  = strings.TrimSpace(os.Getenv("FRONTEND_MESSAGE"))
 	isCymbalBrand    = "true" == strings.ToLower(os.Getenv("CYMBAL_BRANDING"))
-	assistantEnabled = "true" == strings.ToLower(os.Getenv("ENABLE_ASSISTANT"))
+	// Assistant removed -> force disabled to avoid UI hooks.
+	assistantEnabled = false
 	templates        = template.Must(template.New("").
-				Funcs(template.FuncMap{
+		Funcs(template.FuncMap{
 			"renderMoney":        renderMoney,
 			"renderCurrencyLogo": renderCurrencyLogo,
 		}).ParseGlob("templates/*.html"))
@@ -232,7 +232,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add to cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/cart")
+	w.Header().Set("location", baseUrl+"/cart")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -244,7 +244,7 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to empty cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/")
+	w.Header().Set("location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -400,20 +400,8 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (fe *frontendServer) assistantHandler(w http.ResponseWriter, r *http.Request) {
-	currencies, err := fe.getCurrencies(r.Context())
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "could not retrieve currencies"), http.StatusInternalServerError)
-		return
-	}
-
-	if err := templates.ExecuteTemplate(w, "assistant", injectCommonTemplateData(r, map[string]interface{}{
-		"show_currency": false,
-		"currencies":    currencies,
-	})); err != nil {
-		log.Println(err)
-	}
-}
+// NOTE: assistantHandler and chatBotHandler have been removed because the Shopping Assistant service
+// was deleted. Keeping them would reference a non-existent field and break compilation.
 
 func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
@@ -423,7 +411,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 		c.MaxAge = -1
 		http.SetCookie(w, c)
 	}
-	w.Header().Set("Location", baseUrl + "/")
+	w.Header().Set("Location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -445,54 +433,6 @@ func (fe *frontendServer) getProductByID(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.Write(jsonData)
-	w.WriteHeader(http.StatusOK)
-}
-
-func (fe *frontendServer) chatBotHandler(w http.ResponseWriter, r *http.Request) {
-	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
-	type Response struct {
-		Message string `json:"message"`
-	}
-
-	type LLMResponse struct {
-		Content string         `json:"content"`
-		Details map[string]any `json:"details"`
-	}
-
-	var response LLMResponse
-
-	url := "http://" + fe.shoppingAssistantSvcAddr
-	req, err := http.NewRequest(http.MethodPost, url, r.Body)
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)
-		return
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to send request"), http.StatusInternalServerError)
-		return
-	}
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to read response"), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Printf("%+v\n", body)
-	fmt.Printf("%+v\n", res)
-
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		renderHTTPError(log, r, w, errors.Wrap(err, "failed to unmarshal body"), http.StatusInternalServerError)
-		return
-	}
-
-	// respond with the same message
-	json.NewEncoder(w).Encode(Response{Message: response.Content})
-
 	w.WriteHeader(http.StatusOK)
 }
 

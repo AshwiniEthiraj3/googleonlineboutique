@@ -14,26 +14,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
+import os
 import grpc
 import demo_pb2
 import demo_pb2_grpc
-
 from logger import getJSONLogger
-logger = getJSONLogger('recommendationservice-server')
+
+logger = getJSONLogger('recommendationservice-client')
 
 if __name__ == "__main__":
-    # get port
-    if len(sys.argv) > 1:
-        port = sys.argv[1]
-    else:
-        port = "8080"
+    # 🔧 Read environment variables (with sensible Docker defaults)
+    port = os.getenv("PORT", "8080")
+    product_catalog_addr = os.getenv("PRODUCT_CATALOG_SERVICE_ADDR", "productcatalogservice:3550")
+    ad_service_addr = os.getenv("AD_SERVICE_ADDR", "adservice:9555")
 
-    # set up server stub
-    channel = grpc.insecure_channel('localhost:'+port)
+    logger.info(f"Starting RecommendationService client on port {port}")
+    logger.info(f"Connecting to ProductCatalogService at {product_catalog_addr}")
+    logger.info(f"Connecting to AdService at {ad_service_addr}")
+
+    # 🧠 Connect to the running Recommendation Service (self)
+    channel = grpc.insecure_channel(f"0.0.0.0:{port}")
     stub = demo_pb2_grpc.RecommendationServiceStub(channel)
-    # form request
-    request = demo_pb2.ListRecommendationsRequest(user_id="test", product_ids=["test"])
-    # make call to server
-    response = stub.ListRecommendations(request)
-    logger.info(response)
+
+    # 🧾 Form test request
+    request = demo_pb2.ListRecommendationsRequest(
+        user_id="test-user",
+        product_ids=["OLJCESPC7Z", "66VCHSJNUP"]
+    )
+
+    try:
+        # 🚀 Make the gRPC call
+        response = stub.ListRecommendations(request)
+        logger.info(f"Received recommendation response: {response}")
+    except grpc.RpcError as e:
+        logger.error(f"gRPC call failed: {e.code()} - {e.details()}")
+        logger.error("Check that the RecommendationService is running and accessible.")

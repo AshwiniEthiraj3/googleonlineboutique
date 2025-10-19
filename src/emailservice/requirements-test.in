@@ -1,0 +1,9 @@
+# Include base requirements
+-r requirements.in
+
+# --- Testing dependencies ---
+pytest
+pytest-cov
+pytest-mock
+mypy
+flask-testing

@@ -1,0 +1,350 @@
+# Combined Deployments for Google Online Boutique (without loadgenerator)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartservice
+  labels:
+    app: cartservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cartservice
+  template:
+    metadata:
+      labels:
+        app: cartservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: cartservice
+          image: ashwiniethiraj/cartservice:v1
+          ports:
+            - containerPort: 7070
+          env:
+            - name: REDIS_ADDR
+              value: "redis-cart:6379"
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adservice
+  labels:
+    app: adservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adservice
+  template:
+    metadata:
+      labels:
+        app: adservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: adservice
+          image: ashwiniethiraj/adservice:v1
+          ports:
+            - containerPort: 9555
+          env:
+            - name: PORT
+              value: "9555"
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkoutservice
+  labels:
+    app: checkoutservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: checkoutservice
+  template:
+    metadata:
+      labels:
+        app: checkoutservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: checkoutservice
+          image: ashwiniethiraj/checkoutservice:v1
+          ports:
+            - containerPort: 5050
+          env:
+            - name: PRODUCT_CATALOG_SERVICE_ADDR
+              value: productcatalogservice:3550
+            - name: CART_SERVICE_ADDR
+              value: cartservice:7070
+            - name: CURRENCY_SERVICE_ADDR
+              value: currencyservice:7000
+            - name: SHIPPING_SERVICE_ADDR
+              value: shippingservice:50051
+            - name: PAYMENT_SERVICE_ADDR
+              value: paymentservice:8086
+            - name: EMAIL_SERVICE_ADDR
+              value: emailservice:8080
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currencyservice
+  labels:
+    app: currencyservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: currencyservice
+  template:
+    metadata:
+      labels:
+        app: currencyservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: currencyservice
+          image: ashwiniethiraj/currencyservice:v1
+          ports:
+            - containerPort: 7000
+          env:
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emailservice
+  labels:
+    app: emailservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emailservice
+  template:
+    metadata:
+      labels:
+        app: emailservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: emailservice
+          image: ashwiniethiraj/emailservice:v1
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontendservice
+  labels:
+    app: frontendservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontendservice
+  template:
+    metadata:
+      labels:
+        app: frontendservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: frontendservice
+          image: ashwiniethiraj/frontendservice:v1
+          ports:
+            - containerPort: 8080
+          env:
+            - name: AD_SERVICE_ADDR
+              value: adservice:9555
+            - name: RECOMMENDATION_SERVICE_ADDR
+              value: recommendationservice:8080
+            - name: PRODUCT_CATALOG_SERVICE_ADDR
+              value: productcatalogservice:3550
+            - name: CART_SERVICE_ADDR
+              value: cartservice:7070
+            - name: CURRENCY_SERVICE_ADDR
+              value: currencyservice:7000
+            - name: CHECKOUT_SERVICE_ADDR
+              value: checkoutservice:5050
+            - name: SHIPPING_SERVICE_ADDR
+              value: shippingservice:50051
+            - name: EMAIL_SERVICE_ADDR
+              value: emailservice:8080
+            - name: PAYMENT_SERVICE_ADDR
+              value: paymentservice:8086
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentservice
+  labels:
+    app: paymentservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paymentservice
+  template:
+    metadata:
+      labels:
+        app: paymentservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: paymentservice
+          image: ashwiniethiraj/paymentservice:v1
+          ports:
+            - containerPort: 8086
+          env:
+            - name: PORT
+              value: "8086"
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productcatalogservice
+  labels:
+    app: productcatalogservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productcatalogservice
+  template:
+    metadata:
+      labels:
+        app: productcatalogservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: productcatalogservice
+          image: ashwiniethiraj/productcatalogservice:v1
+          ports:
+            - containerPort: 3550
+          env:
+            - name: PORT
+              value: "3550"
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendationservice
+  labels:
+    app: recommendationservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendationservice
+  template:
+    metadata:
+      labels:
+        app: recommendationservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: recommendationservice
+          image: ashwiniethiraj/recommendationservice:v1
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: PRODUCT_CATALOG_SERVICE_ADDR
+              value: productcatalogservice:3550
+            - name: AD_SERVICE_ADDR
+              value: adservice:9555
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cart
+  labels:
+    app: redis-cart
+spec:
+  
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-cart
+  template:
+    metadata:
+      labels:
+        app: redis-cart
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: redis
+          image: redis:alpine
+          ports:
+            - containerPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shippingservice
+  labels:
+    app: shippingservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shippingservice
+  template:
+    metadata:
+      labels:
+        app: shippingservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: shippingservice
+          image: ashwiniethiraj/shippingservice:v1
+          ports:
+            - containerPort: 50051
+          env:
+            - name: PORT
+              value: "50051"
+            - name: DISABLE_PROFILER
+              value: "true"
+      imagePullSecrets:
+        - name: ecr-secret

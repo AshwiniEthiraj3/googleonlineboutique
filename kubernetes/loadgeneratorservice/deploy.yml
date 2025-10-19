@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgeneratorservice
+  labels:
+    app: loadgeneratorservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loadgeneratorservice
+  template:
+    metadata:
+      labels:
+        app: loadgeneratorservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: loadgeneratorservice
+          image: ashwiniethiraj/loadgeneratorservice:v3
+          ports:
+            - containerPort: 8080
+          env:
+            - name: FRONTEND_ADDR
+              value: frontendservice:8080
+            - name: USERS
+              value: "10"
+            - name: DISABLE_PROFILER
+              value: "true"
+       
+      imagePullSecrets:
+        - name: ecr-secret

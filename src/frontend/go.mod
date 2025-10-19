@@ -17,6 +17,10 @@ require (
 	go.opentelemetry.io/otel/sdk v1.35.0
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.6
+
+	// ✅ --- Added for testing ---
+	github.com/stretchr/testify v1.9.0 // common testing assertions and mocks
+	go.uber.org/goleak v1.3.0          // detects goroutine leaks
 )
 
 require (

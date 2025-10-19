@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentservice
+  labels:
+    app: paymentservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paymentservice
+  template:
+    metadata:
+      labels:
+        app: paymentservice
+    spec:
+      serviceAccountName: google-boutique
+      containers:
+        - name: paymentservice
+          image: ashwiniethiraj/paymentservice:v1
+          ports:
+            - containerPort: 8086
+          env:
+            - name: PORT
+              value: "8086"
+            - name: DISABLE_PROFILER
+              value: "true"
+         
+      imagePullSecrets:
+        - name: ecr-secret

@@ -54,7 +54,7 @@ var (
 		"TRY": true,
 	}
 
-	baseUrl         = ""
+	baseUrl = ""
 )
 
 type ctxKeySessionID struct{}
@@ -83,8 +83,6 @@ type frontendServer struct {
 
 	collectorAddr string
 	collectorConn *grpc.ClientConn
-
-	shoppingAssistantSvcAddr string
 }
 
 func main() {
@@ -128,6 +126,8 @@ func main() {
 		srvPort = os.Getenv("PORT")
 	}
 	addr := os.Getenv("LISTEN_ADDR")
+
+	// Required service addresses
 	mustMapEnv(&svc.productCatalogSvcAddr, "PRODUCT_CATALOG_SERVICE_ADDR")
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
 	mustMapEnv(&svc.cartSvcAddr, "CART_SERVICE_ADDR")
@@ -135,8 +135,8 @@ func main() {
 	mustMapEnv(&svc.checkoutSvcAddr, "CHECKOUT_SERVICE_ADDR")
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
 	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
-	mustMapEnv(&svc.shoppingAssistantSvcAddr, "SHOPPING_ASSISTANT_SERVICE_ADDR")
 
+	// Connect to gRPC services
 	mustConnGRPC(ctx, &svc.currencySvcConn, svc.currencySvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
 	mustConnGRPC(ctx, &svc.cartSvcConn, svc.cartSvcAddr)
@@ -145,40 +145,41 @@ func main() {
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
+	// Router setup
 	r := mux.NewRouter()
-	r.HandleFunc(baseUrl + "/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
-	r.HandleFunc(baseUrl + "/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
-	r.HandleFunc(baseUrl + "/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
-	r.HandleFunc(baseUrl + "/cart", svc.addToCartHandler).Methods(http.MethodPost)
-	r.HandleFunc(baseUrl + "/cart/empty", svc.emptyCartHandler).Methods(http.MethodPost)
-	r.HandleFunc(baseUrl + "/setCurrency", svc.setCurrencyHandler).Methods(http.MethodPost)
-	r.HandleFunc(baseUrl + "/logout", svc.logoutHandler).Methods(http.MethodGet)
-	r.HandleFunc(baseUrl + "/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
-	r.HandleFunc(baseUrl + "/assistant", svc.assistantHandler).Methods(http.MethodGet)
-	r.PathPrefix(baseUrl + "/static/").Handler(http.StripPrefix(baseUrl + "/static/", http.FileServer(http.Dir("./static/"))))
-	r.HandleFunc(baseUrl + "/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
-	r.HandleFunc(baseUrl + "/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
-	r.HandleFunc(baseUrl + "/product-meta/{ids}", svc.getProductByID).Methods(http.MethodGet)
-	r.HandleFunc(baseUrl + "/bot", svc.chatBotHandler).Methods(http.MethodPost)
+	r.HandleFunc(baseUrl+"/", svc.homeHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc(baseUrl+"/product/{id}", svc.productHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc(baseUrl+"/cart", svc.viewCartHandler).Methods(http.MethodGet, http.MethodHead)
+	r.HandleFunc(baseUrl+"/cart", svc.addToCartHandler).Methods(http.MethodPost)
+	r.HandleFunc(baseUrl+"/cart/empty", svc.emptyCartHandler).Methods(http.MethodPost)
+	r.HandleFunc(baseUrl+"/setCurrency", svc.setCurrencyHandler).Methods(http.MethodPost)
+	r.HandleFunc(baseUrl+"/logout", svc.logoutHandler).Methods(http.MethodGet)
+	r.HandleFunc(baseUrl+"/cart/checkout", svc.placeOrderHandler).Methods(http.MethodPost)
 
+	// Static and health routes
+	r.PathPrefix(baseUrl + "/static/").Handler(http.StripPrefix(baseUrl+"/static/", http.FileServer(http.Dir("./static/"))))
+	r.HandleFunc(baseUrl+"/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
+	r.HandleFunc(baseUrl+"/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
+	r.HandleFunc(baseUrl+"/product-meta/{ids}", svc.getProductByID).Methods(http.MethodGet)
+
+	// Logging + tracing handlers
 	var handler http.Handler = r
-	handler = &logHandler{log: log, next: handler}     // add logging
-	handler = ensureSessionID(handler)                 // add session ID
-	handler = otelhttp.NewHandler(handler, "frontend") // add OTel tracing
+	handler = &logHandler{log: log, next: handler}
+	handler = ensureSessionID(handler)
+	handler = otelhttp.NewHandler(handler, "frontend")
 
 	log.Infof("starting server on " + addr + ":" + srvPort)
 	log.Fatal(http.ListenAndServe(addr+":"+srvPort, handler))
 }
+
 func initStats(log logrus.FieldLogger) {
-	// TODO(arbrown) Implement OpenTelemtry stats
+	// TODO: Implement OpenTelemetry stats if needed
 }
 
 func initTracing(log logrus.FieldLogger, ctx context.Context, svc *frontendServer) (*sdktrace.TracerProvider, error) {
 	mustMapEnv(&svc.collectorAddr, "COLLECTOR_SERVICE_ADDR")
 	mustConnGRPC(ctx, &svc.collectorConn, svc.collectorAddr)
-	exporter, err := otlptracegrpc.New(
-		ctx,
-		otlptracegrpc.WithGRPCConn(svc.collectorConn))
+	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(svc.collectorConn))
 	if err != nil {
 		log.Warnf("warn: Failed to create trace exporter: %v", err)
 	}
@@ -186,29 +187,22 @@ func initTracing(log logrus.FieldLogger, ctx context.Context, svc *frontendServe
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithSampler(sdktrace.AlwaysSample()))
 	otel.SetTracerProvider(tp)
-
 	return tp, err
 }
 
 func initProfiling(log logrus.FieldLogger, service, version string) {
-	// TODO(ahmetb) this method is duplicated in other microservices using Go
-	// since they are not sharing packages.
 	for i := 1; i <= 3; i++ {
 		log = log.WithField("retry", i)
 		if err := profiler.Start(profiler.Config{
 			Service:        service,
 			ServiceVersion: version,
-			// ProjectID must be set if not running on GCP.
-			// ProjectID: "my-project",
 		}); err != nil {
 			log.Warnf("warn: failed to start profiler: %+v", err)
 		} else {
 			log.Info("started Stackdriver profiler")
 			return
 		}
-		d := time.Second * 10 * time.Duration(i)
-		log.Debugf("sleeping %v to retry initializing Stackdriver profiler", d)
-		time.Sleep(d)
+		time.Sleep(time.Second * 10 * time.Duration(i))
 	}
 	log.Warn("warning: could not initialize Stackdriver profiler after retrying, giving up")
 }
