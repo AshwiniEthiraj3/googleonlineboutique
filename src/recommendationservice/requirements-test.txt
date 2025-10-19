@@ -1,7 +1,0 @@
--r requirements.in
-
-# --- testing & linting ---
-pytest
-pytest-cov
-grpcio-testing
-mypy
