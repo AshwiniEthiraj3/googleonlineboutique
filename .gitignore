@@ -10,6 +10,6 @@ crash.*.log
 terraform.rc
 
 **/.terraform/*
-terraform/
+
 *.tfstate
 *.tfstate.*
