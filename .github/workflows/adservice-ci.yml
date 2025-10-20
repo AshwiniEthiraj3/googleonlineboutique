@@ -19,7 +19,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
+      - name: Set execute permission for gradlew
+        run: chmod +x ./gradlew
+        
       - name: Build
         run: |
             cd src/adservice
