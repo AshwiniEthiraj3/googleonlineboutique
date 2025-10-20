@@ -21,7 +21,9 @@ jobs:
           java-version: '17'
 
       - name: Build
-        run: ./gradlew build
+        run: |
+            cd src/adservice
+            ./gradlew build
 
       - name: Run Unit Tests
         run: ./gradlew test --no-daemon
