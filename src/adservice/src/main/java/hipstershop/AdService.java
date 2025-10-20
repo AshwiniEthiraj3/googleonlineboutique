@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 //
-
 package hipstershop;
 
 import com.google.common.collect.ImmutableListMultimap;
