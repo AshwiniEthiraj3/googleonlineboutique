@@ -20,10 +20,17 @@ def jacksonCoreVersion = "2.20.0"
 def jacksonDatabindVersion = "2.20.0"
 def protocVersion = "4.32.1"
 
-tasks.withType(JavaCompile) {
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(24) // use your installed JDK version
+    }
 }
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 
 ext {
     speed = project.hasProperty('speed') ? project.getProperty('speed') : false
