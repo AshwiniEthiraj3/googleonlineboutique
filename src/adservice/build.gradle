@@ -22,7 +22,7 @@ def protocVersion = "4.32.1"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(24) // use your installed JDK version
+        languageVersion = JavaLanguageVersion.of(17) // use your installed JDK version
     }
 }
 
