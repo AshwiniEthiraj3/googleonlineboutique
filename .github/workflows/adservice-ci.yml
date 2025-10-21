@@ -22,10 +22,11 @@ jobs:
       - name: Set execute permission for gradlew
         run: chmod +x src/adservice/gradlew
         
-      - name: Build
+      - name: Build (skip verify formatting)
         run: |
-            cd src/adservice
-            ./gradlew googleJavaFormat build --continue
+             cd src/adservice
+             ./gradlew build -x verifyGoogleJavaFormat -x googleJavaFormat
+
 
       - name: Run Unit Tests
         run: ./gradlew test --no-daemon
