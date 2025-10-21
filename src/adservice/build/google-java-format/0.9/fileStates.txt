@@ -1,0 +1,4 @@
+test/java/googleboutique/AdServiceTest.java,1760885722390366100,0,INVALID
+src/main/java/hipstershop/AdServiceClient.java,1760885561673605000,3864,INVALID
+src/main/java/hipstershop/AdService.java,1761020180644245500,8135,INVALID
+test/java/googleboutique/AdServiceClientTest.java,1760885722390366100,0,INVALID
