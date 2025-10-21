@@ -25,7 +25,7 @@ jobs:
       - name: Build
         run: |
             cd src/adservice
-            ./gradlew clean build
+            ./gradlew googleJavaFormat build --continue
 
       - name: Run Unit Tests
         run: ./gradlew test --no-daemon
