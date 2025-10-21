@@ -79,7 +79,7 @@ jobs:
           context: ./src/adservice
           file: ./src/adservice/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/adservice:${{ github.run_id }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/adservices:${{ github.run_id }}
 
   # ---------- Update Kubernetes Manifests ----------
   updatek8s:
