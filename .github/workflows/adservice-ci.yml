@@ -18,10 +18,14 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
-
+          java-version: '19'
+      - name: Set execute permission for gradlew
+        run: chmod +x src/adservice/gradlew
+        
       - name: Build
-        run: ./gradlew build
+        run: |
+            cd src/adservice
+            ./gradlew googleJavaFormat build
 
       - name: Run Unit Tests
         run: ./gradlew test --no-daemon
