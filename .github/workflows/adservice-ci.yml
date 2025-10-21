@@ -103,4 +103,4 @@ jobs:
           git config --global user.name "ashwiniethiraj"
           git add kubernetes/adservice/deploy.yml
           git commit -m "ci: update adservice image tag"
-          git push
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
