@@ -29,7 +29,10 @@ jobs:
 
 
       - name: Run Unit Tests
-        run: ./gradlew test --no-daemon
+      
+        run: |
+              cd src/adservice/test
+              ./gradlew test --no-daemon
 
   # ---------- Code Quality Job ----------
   code-quality:
