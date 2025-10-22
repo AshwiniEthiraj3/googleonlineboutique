@@ -21,17 +21,17 @@ jobs:
 
       - name: Restore dependencies
         run: |
-          cd src
+          cd src/cartservice
           dotnet restore cartservice.sln
 
       - name: Build
         run: |
-          cd src
+          cd src/cartservice
           dotnet build cartservice.sln --configuration Release --no-restore
 
       - name: Run Unit Tests
         run: |
-          cd src/tests
+          cd src/cartservice/tests
           dotnet test cartservice.tests.csproj --no-restore --verbosity normal
 
   # ---------- Docker Build & Push ----------
@@ -55,8 +55,8 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ./src
-          file: ./src/Dockerfile
+          context: ./src/cartservice
+          file: ./src/cartservice/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/cartservice:${{ github.run_id }}
 
