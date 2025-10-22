@@ -17,7 +17,7 @@ spec:
       serviceAccountName: google-boutique
       containers:
         - name: adservice
-          image: ashwiniethiraj/adservices:18708449932
+          image: ashwiniethiraj/adservices:18708458249
           ports:
             - containerPort: 9555
           env:
