@@ -42,7 +42,7 @@ jobs:
   code-quality:
     runs-on: ubuntu-latest
     name: Code Quality Check (golangci-lint)
-    needs: build   # runs after build, in parallel with docker
+    needs: build   # runs after build, parallel with docker
 
     steps:
       - name: Checkout code
@@ -64,7 +64,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     name: Build & Push Docker Image
-    needs: build   # depends only on build (not lint)
+    needs: build   # depends only on build (parallel to lint)
 
     steps:
       - name: Checkout code
@@ -79,6 +79,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
+      # ✅ Disable Docker build summary
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
@@ -86,14 +87,15 @@ jobs:
           file: ./src/checkoutservice/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/checkoutservice:${{ github.run_id }}
-          provenance: false
-          sbom: false
+          provenance: false        # disables Docker Build Summary
+          sbom: false              # disables SBOM
+          outputs: type=image      # ensures no extra summary artifacts
 
   # ---------- Update Kubernetes Manifest ----------
   updatek8s:
     runs-on: ubuntu-latest
     name: Update K8s Deployment
-    needs: docker   # runs after docker (same as adservice)
+    needs: docker   # runs after docker
 
     steps:
       - name: Checkout code
