@@ -4,11 +4,15 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "src/checkoutservice/**"
+      - ".github/workflows/checkoutservice-ci.yml"
 
 jobs:
   # ---------- Build & Unit Test ----------
   build:
     runs-on: ubuntu-latest
+    name: Build and Test
 
     steps:
       - name: Checkout code
@@ -17,7 +21,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22' # or your project version
+          go-version: '1.22'
 
       - name: Download Go modules
         run: |
@@ -37,6 +41,7 @@ jobs:
   # ---------- Code Quality & Lint ----------
   code-quality:
     runs-on: ubuntu-latest
+    name: Code Quality Check (golangci-lint)
     needs: build
 
     steps:
@@ -48,20 +53,17 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Install golangci-lint
+      - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.59.1 # latest stable version
+          version: v1.59.1
           working-directory: src/checkoutservice
-
-      - name: Run golangci-lint
-        run: |
-          cd src/checkoutservice
-          golangci-lint run --timeout=5m
+          args: --timeout=5m
 
   # ---------- Docker Build & Push ----------
   docker:
     runs-on: ubuntu-latest
+    name: Build & Push Docker Image
     needs: code-quality
 
     steps:
@@ -88,6 +90,7 @@ jobs:
   # ---------- Update Kubernetes Manifest ----------
   updatek8s:
     runs-on: ubuntu-latest
+    name: Update K8s Deployment
     needs: docker
 
     steps:
@@ -104,7 +107,7 @@ jobs:
 
       - name: Update image tag in Kubernetes manifest
         run: |
-          sed -i "s|image:.*|image: ${{ secrets.DOCKER_USERNAME }}/checkoutservices:${{ github.run_id }}|" kubernetes/checkoutservice/deploy.yml
+          sed -i "s|image:.*|image: ${{ secrets.DOCKER_USERNAME }}/checkoutservice:${{ github.run_id }}|" kubernetes/checkoutservice/deploy.yml
 
       - name: Commit and push changes
         env:
