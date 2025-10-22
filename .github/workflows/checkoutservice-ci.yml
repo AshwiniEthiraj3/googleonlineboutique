@@ -38,7 +38,7 @@ jobs:
           cd src/checkoutservice
           go test -v ./...
 
-  # ---------- Code Quality & Lint ----------
+  # ---------- Code Quality & Lint ------
   code-quality:
     runs-on: ubuntu-latest
     name: Code Quality Check (golangci-lint)
