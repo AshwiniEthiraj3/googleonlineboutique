@@ -3,7 +3,7 @@ name: cartservice-ci
 on:
   pull_request:
     branches:
-      - main
+      - myfeature1
 
 jobs:
   # ---------- Build & Unit Test ----------
