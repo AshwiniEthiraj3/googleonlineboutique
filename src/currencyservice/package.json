@@ -3,13 +3,9 @@
   "version": "0.1.0",
   "description": "A gRPC currency conversion microservice",
   "repository": "https://github.com/GoogleCloudPlatform/microservices-demo",
-{
- "scripts": {
-   
-  
+  "scripts": {
+    "start": "node server.js",
     "test": "jest --runInBand"
-} 
-
   },
   "license": "Apache-2.0",
   "dependencies": {
