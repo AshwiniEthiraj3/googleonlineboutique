@@ -17,7 +17,11 @@ spec:
       serviceAccountName: google-boutique
       containers:
         - name: currencyservice
-          image: ashwiniethiraj/currencyservice:18914993518
+<<<<<<< Updated upstream
+          image: ashwiniethiraj/currencyservice:18915099918
+=======
+          image: ashwiniethiraj/currencyservice:18915099918
+>>>>>>> Stashed changes
           ports:
             - containerPort: 7000
           env:
