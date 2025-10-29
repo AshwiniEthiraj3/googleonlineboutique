@@ -17,7 +17,7 @@ spec:
       serviceAccountName: google-boutique
       containers:
         - name: checkoutservice
-          image: ashwiniethiraj/checkoutservice:18911652730
+          image: ashwiniethiraj/checkoutservice:18914475242
           ports:
             - containerPort: 5050
           env:
