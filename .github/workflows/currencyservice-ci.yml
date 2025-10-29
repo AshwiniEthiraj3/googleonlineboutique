@@ -9,7 +9,7 @@ on:
       - ".github/workflows/currencyservice-ci.yml"
 
 jobs:
-  # ---------- Build & Test ----------
+  # ---------- Build & Test -----
   build:
     runs-on: ubuntu-latest
     name: Build and Test
