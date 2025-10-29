@@ -3,10 +3,8 @@ name: currencyservice-ci
 on:
   pull_request:
     branches:
-      - myfeature1
-    paths:
-      - "src/currencyservice/**"
-      - ".github/workflows/currencyservice-ci.yml"
+      - main
+  
 
 jobs:
   # ---------- Build & Test ----------
