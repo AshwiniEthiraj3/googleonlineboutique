@@ -17,7 +17,7 @@ spec:
       serviceAccountName: google-boutique
       containers:
         - name: currencyservice
-          image: ashwiniethiraj/currencyservice:18914899109
+          image: ashwiniethiraj/currencyservice:18914926808
           ports:
             - containerPort: 7000
           env:
