@@ -23,10 +23,12 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Download Go modules
+      - name: Download and verify Go modules
         run: |
           cd src/checkoutservice
           go mod tidy
+          go mod download
+          go mod verify
 
       - name: Build
         run: |
@@ -80,6 +82,14 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
+      # ✅ Pre-download Go modules before Docker build
+      - name: Pre-cache Go modules
+        run: |
+          cd src/checkoutservice
+          go mod tidy
+          go mod download
+          go mod verify
+
       # ✅ No build summary or SBOM output
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
@@ -96,7 +106,7 @@ jobs:
   updatek8s:
     runs-on: ubuntu-latest
     name: Update K8s Deployment
-    needs: docker   # runs after docker (like adservice)
+    needs: docker   # runs after docker
 
     steps:
       - name: Checkout code
