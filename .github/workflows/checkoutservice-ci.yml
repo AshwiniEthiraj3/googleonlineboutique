@@ -3,7 +3,7 @@ name: checkoutservice-ci
 on:
   pull_request:
     branches:
-      - myfeature1
+      - main
     paths:
       - "src/checkoutservice/**"
       - ".github/workflows/checkoutservice-ci.yml"

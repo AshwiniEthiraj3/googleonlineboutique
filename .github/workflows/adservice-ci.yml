@@ -3,7 +3,7 @@ name: adservice-ci
 on:
   pull_request:
     branches:
-      - my-feature1
+      - main
 
 jobs:
   # ---------- Build & Unit Test Job ----------
