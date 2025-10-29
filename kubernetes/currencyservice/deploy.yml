@@ -18,9 +18,9 @@ spec:
       containers:
         - name: currencyservice
 <<<<<<< Updated upstream
-          image: ashwiniethiraj/currencyservice:18915092377
+          image: ashwiniethiraj/currencyservice:18915097371
 =======
-          image: ashwiniethiraj/currencyservice:18915092377
+          image: ashwiniethiraj/currencyservice:18915097371
 >>>>>>> Stashed changes
           ports:
             - containerPort: 7000
