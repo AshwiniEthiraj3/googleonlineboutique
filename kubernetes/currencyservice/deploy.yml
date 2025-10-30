@@ -20,6 +20,7 @@ spec:
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           image: ashwiniethiraj/currencyservice:18928088780
 =======
           image: ashwiniethiraj/currencyservice:18928088780
@@ -35,6 +36,23 @@ spec:
           image: ashwiniethiraj/currencyservice:18928088780
 =======
           image: ashwiniethiraj/currencyservice:18928088780
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+=======
+          image: ashwiniethiraj/currencyservice:18928084361
+>>>>>>> Stashed changes
 >>>>>>> Stashed changes
 >>>>>>> Stashed changes
 >>>>>>> Stashed changes
