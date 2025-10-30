@@ -4,12 +4,10 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - "src/emailservice/**"
-      - ".github/workflows/emailservice-ci.yml"
+   
 
 jobs:
-  # ---------- Build & Test ----------
+  # ---------- Build & Test ------
   build:
     runs-on: ubuntu-latest
     name: Build and Test
