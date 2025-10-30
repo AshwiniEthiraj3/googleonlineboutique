@@ -19,6 +19,7 @@ spec:
         - name: currencyservice
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           image: ashwiniethiraj/currencyservice:18928017377
 =======
           image: ashwiniethiraj/currencyservice:18928017377
@@ -26,6 +27,15 @@ spec:
           image: ashwiniethiraj/currencyservice:18928017377
 =======
           image: ashwiniethiraj/currencyservice:18928017377
+=======
+          image: ashwiniethiraj/currencyservice:18928019750
+=======
+          image: ashwiniethiraj/currencyservice:18928019750
+=======
+          image: ashwiniethiraj/currencyservice:18928019750
+=======
+          image: ashwiniethiraj/currencyservice:18928019750
+>>>>>>> Stashed changes
 >>>>>>> Stashed changes
 >>>>>>> Stashed changes
           ports:
