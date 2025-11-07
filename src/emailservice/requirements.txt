@@ -51,4 +51,4 @@ zipp==3.17.0
 pytest==8.3.3
 
 # The following packages are considered unsafe in a requirements file:
-# setuptool
+# setuptoo
